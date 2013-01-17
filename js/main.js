@@ -78,6 +78,7 @@ function resizeObject(object, w, h){
         origWidth  = object.width(),
         origHeight = object.height();
     moveObject(object, origLeft-((w-origWidth)/2), origTop-((h-origHeight)/2));
-    object.css('width', w);
-    object.css('height', h);
+    object.css('width', Math.round(w));
+    object.css('height', Math.round(h));
+    object.css('line-height', Math.round(h) + "px");
 }
