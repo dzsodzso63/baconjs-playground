@@ -2,8 +2,8 @@
 $(function() {
     var isTransforming = false, objectToTransform;
     var document_click = $(document).asEventStream("click").map(function(event){return $(event.target).closest('div');});
-    var object_click = document_click.filter(function(object){return object[0] == $("#b_object")[0];});
-    var outside_click = document_click.filter(function(object){return object[0] != $("#b_object")[0] && !object.hasClass("z");});
+    var object_click = document_click.filter(function(object){return object.hasClass("transformable")});
+    var outside_click = document_click.filter(function(object){return !object.hasClass("transformable") && !object.hasClass("z");});
     var mouse_position = $(document).asEventStream("mousemove").map(function(event) { return {x: event.clientX, y: event.clientY}; }).toProperty({x: 0, y: 0});
     var zebra_visible = function(){return $("#b_zebra").is(':visible');};
     var show_zebra = object_click.filter(function(){return !zebra_visible();});

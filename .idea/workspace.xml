@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="7874ecca-e0b1-4dee-ac5d-4118167da134" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/css/main.css" afterPath="$PROJECT_DIR$/css/main.css" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/main.js" afterPath="$PROJECT_DIR$/js/main.js" />
     </list>
     <ignored path="baconjs-playground.iws" />
@@ -64,16 +65,16 @@
       <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="25" column="58" selection-start="1290" selection-end="1290" vertical-scroll-proportion="-11.730769">
+            <state line="21" column="76" selection-start="948" selection-end="948" vertical-scroll-proportion="-8.961538">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.js" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="main.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="74" column="158" selection-start="3800" selection-end="3800" vertical-scroll-proportion="0.0">
+            <state line="5" column="71" selection-start="365" selection-end="365" vertical-scroll-proportion="0.12">
               <folding />
             </state>
           </provider>
@@ -88,10 +89,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main.css" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="main.css" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/css/main.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="36" column="30" selection-start="763" selection-end="763" vertical-scroll-proportion="0.5190039">
+            <state line="43" column="156" selection-start="849" selection-end="849" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -111,8 +112,8 @@
     <option name="changedFiles">
       <list>
         <option value="$PROJECT_DIR$/index.html" />
-        <option value="$PROJECT_DIR$/js/main.js" />
         <option value="$PROJECT_DIR$/css/main.css" />
+        <option value="$PROJECT_DIR$/js/main.js" />
       </list>
     </option>
   </component>
@@ -461,9 +462,16 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/css/main.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="43" column="156" selection-start="849" selection-end="849" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="25" column="58" selection-start="1290" selection-end="1290" vertical-scroll-proportion="-11.730769">
+        <state line="21" column="76" selection-start="948" selection-end="948" vertical-scroll-proportion="-8.961538">
           <folding />
         </state>
       </provider>
@@ -477,14 +485,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="74" column="158" selection-start="3800" selection-end="3800" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/css/main.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="36" column="30" selection-start="763" selection-end="763" vertical-scroll-proportion="0.5190039">
+        <state line="5" column="71" selection-start="365" selection-end="365" vertical-scroll-proportion="0.12">
           <folding />
         </state>
       </provider>

@@ -50,6 +50,14 @@ body {
     height: 200px;
     line-height: 200px;
 }
+#b_object2 {
+    background: #cba;
+    top: 100px;
+    left: 500px;
+    width: 100px;
+    height: 200px;
+    line-height: 200px;
+}
 
 #b_zebra {
     background: #632;
