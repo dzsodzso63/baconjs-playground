@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7874ecca-e0b1-4dee-ac5d-4118167da134" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/main.js" afterPath="$PROJECT_DIR$/js/main.js" />
     </list>
     <ignored path="baconjs-playground.iws" />
@@ -74,7 +72,7 @@
       <file leaf-file-name="main.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="23" column="8" selection-start="1828" selection-end="1828" vertical-scroll-proportion="0.542595">
+            <state line="10" column="159" selection-start="886" selection-end="886" vertical-scroll-proportion="0.24">
               <folding />
             </state>
           </provider>
@@ -484,7 +482,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="23" column="8" selection-start="1828" selection-end="1828" vertical-scroll-proportion="0.542595">
+        <state line="10" column="159" selection-start="886" selection-end="886" vertical-scroll-proportion="0.24">
           <folding />
         </state>
       </provider>

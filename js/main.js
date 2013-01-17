@@ -1,6 +1,6 @@
 
 $(function() {
-    var isTransforming = false;
+    var isTransforming = false, objectToTransform;
     var document_click = $(document).asEventStream("click").map(function(event){return $(event.target).closest('div');});
     var object_click = document_click.filter(function(object){return object[0] == $("#b_object")[0];});
     var outside_click = document_click.filter(function(object){return object[0] != $("#b_object")[0] && !object.hasClass("z");});
@@ -17,11 +17,18 @@ $(function() {
     var function_started = current_button.sampledBy(mouse_down.filter(current_button)).toProperty();
     var drag = mouse_position.changes().filter(mouse_button).filter(function(){return isTransforming;});
     var function_ended = mouse_up.filter(function(){return isTransforming;});
-    var start_state = function_started.changes().map(mouse_position);
+    var start_state = function_started.changes().map(mouse_position).map(function(pos){return [pos, objectToTransform.offset()];});
     var transform = Bacon.combineAsArray(start_state, drag, function_started.changes().filter(function_started));
 
-    transform.onValue(function(origPos, pos, func){
-
+    transform.onValue(function(params){
+        var startCurPos = params[0][0],
+            startObjPos = params[0][1],
+            curPos      = params[1],
+            func        = params[2];
+        if (func == "move"){
+            moveObject(objectToTransform, startObjPos.left + (curPos.x - startCurPos.x), startObjPos.top + (curPos.y - startCurPos.y));
+            centerObjectToObject($("#b_zebra"), objectToTransform);
+        }
     });
     function_ended.onValue(function(){
         isTransforming = false;
@@ -32,6 +39,7 @@ $(function() {
     show_zebra.onValue(function(object){
         centerObjectToObject($("#b_zebra"), object);
         $("#b_zebra").fadeIn(100);
+        objectToTransform = object;
     });
     remove_zebra.onValue(function(object){
         $("#b_zebra").fadeOut(100);
@@ -43,6 +51,10 @@ function centerObjectToObject(objectToCenter, objectBase){
         x: objectBase.offset().left + (objectBase.width()  / 2),
         y: objectBase.offset().top  + (objectBase.height() / 2)
     };
-    objectToCenter.css("left", center.x - objectToCenter.width() / 2)
-        .css("top", center.y - objectToCenter.height() / 2);
+    moveObject(objectToCenter, center.x - objectToCenter.width() / 2, center.y - objectToCenter.height() / 2);
+}
+
+function moveObject(object, x, y){
+    object.css('left', x);
+    object.css('top', y);
 }
