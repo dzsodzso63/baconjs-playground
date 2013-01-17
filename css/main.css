@@ -30,6 +30,12 @@ body {
     opacity: .7;
     text-align: center;
     vertical-align: middle;
+    user-select: none;
+}
+
+.display_area span{
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #b_object {

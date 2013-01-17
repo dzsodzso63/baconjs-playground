@@ -33,6 +33,7 @@ $(function() {
             curPos      = params[1],
             func        = params[2],
             scale;
+        if (!isTransforming) return;
         if (func === "move"){
             moveObject(objectToTransform, startObjPos.left + (curPos.x - startCurPos.x), startObjPos.top + (curPos.y - startCurPos.y));
             centerObjectToObject($("#b_zebra"), objectToTransform);
@@ -40,7 +41,7 @@ $(function() {
         if (func === "scale"){
             scale = Math.pow(3,((curPos.x - startCurPos.x)/1000));
             resizeObject(objectToTransform, startObjSize.width * scale, startObjSize.height * scale);
-            centerObjectToObject($("#b_zebra"), objectToTransform);
+            //centerObjectToObject($("#b_zebra"), objectToTransform);
         }
     });
     function_ended.onValue(function(){
