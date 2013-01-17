@@ -17,16 +17,29 @@ $(function() {
     var function_started = current_button.sampledBy(mouse_down.filter(current_button)).toProperty();
     var drag = mouse_position.changes().filter(mouse_button).filter(function(){return isTransforming;});
     var function_ended = mouse_up.filter(function(){return isTransforming;});
-    var start_state = function_started.changes().map(mouse_position).map(function(pos){return [pos, objectToTransform.offset()];});
+    var start_state = function_started.changes().map(mouse_position).map(function(pos){
+        return [
+            pos,
+            objectToTransform.offset(),
+            {width: objectToTransform.width(), height: objectToTransform.height()}
+        ];
+    });
     var transform = Bacon.combineAsArray(start_state, drag, function_started.changes().filter(function_started));
 
     transform.onValue(function(params){
         var startCurPos = params[0][0],
             startObjPos = params[0][1],
+            startObjSize = params[0][2],
             curPos      = params[1],
-            func        = params[2];
-        if (func == "move"){
+            func        = params[2],
+            scale;
+        if (func === "move"){
             moveObject(objectToTransform, startObjPos.left + (curPos.x - startCurPos.x), startObjPos.top + (curPos.y - startCurPos.y));
+            centerObjectToObject($("#b_zebra"), objectToTransform);
+        }
+        if (func === "scale"){
+            scale = Math.pow(3,((curPos.x - startCurPos.x)/1000));
+            resizeObject(objectToTransform, startObjSize.width * scale, startObjSize.height * scale);
             centerObjectToObject($("#b_zebra"), objectToTransform);
         }
     });
@@ -57,4 +70,14 @@ function centerObjectToObject(objectToCenter, objectBase){
 function moveObject(object, x, y){
     object.css('left', x);
     object.css('top', y);
+}
+
+function resizeObject(object, w, h){
+    var origLeft   = object.offset().left,
+        origTop    = object.offset().top,
+        origWidth  = object.width(),
+        origHeight = object.height();
+    moveObject(object, origLeft-((w-origWidth)/2), origTop-((h-origHeight)/2));
+    object.css('width', w);
+    object.css('height', h);
 }
