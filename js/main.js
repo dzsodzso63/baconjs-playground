@@ -42,7 +42,7 @@ function createTransformStream(){
         document_click = $(document).asEventStream("click").map(function(event){return $(event.target).closest('div');}),
         object_click = document_click.filter(function(object){return object.hasClass("transformable")}),
         outside_click = document_click.filter(function(object){return !object.hasClass("transformable") && !object.hasClass("z");}),
-        mouse_position = $(document).asEventStream("mousemove").map(function(event) { return {x: event.clientX, y: event.clientY}; }).toProperty({x: 0, y: 0}),
+        mouse_position = $(document).asEventStream("mousemove").merge($(document).asEventStream("mousedown")).map(function(event) { return {x: event.clientX, y: event.clientY}; }).toProperty({x: 0, y: 0}),
         zebra_visible = function(){return $("#b_zebra").is(':visible');},
         show_zebra = object_click.filter(function(){return !zebra_visible();}),
         remove_zebra = outside_click.filter(function(){return zebra_visible();}),
