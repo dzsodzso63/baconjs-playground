@@ -33,6 +33,10 @@ body {
     user-select: none;
 }
 
+.transformable{
+    -webkit-transform: rotate(0deg);
+}
+
 .display_area span{
     user-select: none;
     -webkit-user-select: none;

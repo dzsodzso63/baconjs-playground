@@ -32,7 +32,7 @@ $(function() {
             startObjSize = params[0][2],
             curPos      = params[1],
             func        = params[2],
-            scale;
+            scale, radAngle, degreeAngle;
         if (!isTransforming) return;
         if (func === "move"){
             moveObject(objectToTransform, startObjPos.left + (curPos.x - startCurPos.x), startObjPos.top + (curPos.y - startCurPos.y));
@@ -41,7 +41,11 @@ $(function() {
         if (func === "scale"){
             scale = Math.pow(3,((curPos.x - startCurPos.x)/1000));
             resizeObject(objectToTransform, startObjSize.width * scale, startObjSize.height * scale);
-            //centerObjectToObject($("#b_zebra"), objectToTransform);
+        }
+        if (func === "rotate"){
+            radAngle = Math.atan2((curPos.y - startCurPos.y), (curPos.x - startCurPos.x));
+            degreeAngle = radAngle * 180.0 / Math.PI;
+            rotateObject(objectToTransform, degreeAngle);
         }
     });
     function_ended.onValue(function(){
@@ -82,4 +86,14 @@ function resizeObject(object, w, h){
     object.css('width', Math.round(w));
     object.css('height', Math.round(h));
     object.css('line-height', Math.round(h) + "px");
+}
+
+function rotateObject(object, degree) {
+    object.css({
+        '-webkit-transform': 'rotate(' + degree + 'deg)',
+        '-moz-transform': 'rotate(' + degree + 'deg)',
+        '-ms-transform': 'rotate(' + degree + 'deg)',
+        '-o-transform': 'rotate(' + degree + 'deg)',
+        'transform': 'rotate(' + degree + 'deg)'
+    });
 }
