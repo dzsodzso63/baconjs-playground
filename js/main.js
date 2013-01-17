@@ -1,58 +1,74 @@
 
 $(function() {
-    var isTransforming = false, objectToTransform;
-    var document_click = $(document).asEventStream("click").map(function(event){return $(event.target).closest('div');});
-    var object_click = document_click.filter(function(object){return object.hasClass("transformable")});
-    var outside_click = document_click.filter(function(object){return !object.hasClass("transformable") && !object.hasClass("z");});
-    var mouse_position = $(document).asEventStream("mousemove").map(function(event) { return {x: event.clientX, y: event.clientY}; }).toProperty({x: 0, y: 0});
-    var zebra_visible = function(){return $("#b_zebra").is(':visible');};
-    var show_zebra = object_click.filter(function(){return !zebra_visible();});
-    var remove_zebra = outside_click.filter(function(){return zebra_visible();});
-    var mouse_up = $(document).asEventStream("mouseup").map(false);
-    var mouse_down = $(document).asEventStream("mousedown").map(true);
-    var mouse_button = mouse_up.merge(mouse_down).toProperty(false);
-    var mouse_enter = $(".z_button").asEventStream("mouseenter").map(function(event){return $(event.target).closest('div').attr('data-function');});
-    var mouse_leave = $(".z_button").asEventStream("mouseleave").map(null);
-    var current_button = mouse_enter.merge(mouse_leave).toProperty(null);
-    var function_started = current_button.sampledBy(mouse_down.filter(current_button)).toProperty();
-    var drag = mouse_position.changes().filter(mouse_button).filter(function(){return isTransforming;});
-    var function_ended = mouse_up.filter(function(){return isTransforming;});
-    var start_state = function_started.changes().map(mouse_position).map(function(pos){
-        return [
-            pos,
-            objectToTransform.offset(),
-            {width: objectToTransform.width(), height: objectToTransform.height()}
-        ];
-    });
-    var transform = Bacon.combineAsArray(start_state, drag, function_started.changes().filter(function_started));
+    var transform = createTransformStream(),
+        move = transform.filter(transformFunctionFilter("move")),
+        scale = transform.filter(transformFunctionFilter("scale")),
+        rotate = transform.filter(transformFunctionFilter("rotate"));
 
-    transform.onValue(function(params){
+    createObjects(10, "object_");
+
+    move.onValue(function(params){
         var startCurPos = params[0][0],
             startObjPos = params[0][1],
-            startObjSize = params[0][2],
             curPos      = params[1],
-            func        = params[2],
-            scale, radAngle, degreeAngle;
-        if (!isTransforming) return;
-        if (func === "move"){
-            moveObject(objectToTransform, startObjPos.left + (curPos.x - startCurPos.x), startObjPos.top + (curPos.y - startCurPos.y));
-            centerObjectToObject($("#b_zebra"), objectToTransform);
-        }
-        if (func === "scale"){
-            scale = Math.pow(3,((curPos.x - startCurPos.x)/1000));
-            resizeObject(objectToTransform, startObjSize.width * scale, startObjSize.height * scale);
-        }
-        if (func === "rotate"){
-            radAngle = Math.atan2((curPos.y - startCurPos.y), (curPos.x - startCurPos.x));
-            degreeAngle = radAngle * 180.0 / Math.PI;
-            rotateObject(objectToTransform, degreeAngle);
-        }
+            object      = params[0][3];
+        moveObject(object, startObjPos.left + (curPos.x - startCurPos.x), startObjPos.top + (curPos.y - startCurPos.y));
+        centerObjectToObject($("#b_zebra"), object);
     });
+    scale.onValue(function(params){
+        var startCurPos  = params[0][0],
+            startObjSize = params[0][2],
+            object       = params[0][3],
+            curPos       = params[1],
+            scale;
+        scale = Math.pow(3,((curPos.x - startCurPos.x)/1000));
+        resizeObject(object, startObjSize.width * scale, startObjSize.height * scale);
+    });
+    rotate.onValue(function(params){
+        var startCurPos = params[0][0],
+            object      = params[0][3],
+            curPos      = params[1],
+            radAngle, degreeAngle;
+        radAngle = Math.atan2((curPos.y - startCurPos.y), (curPos.x - startCurPos.x));
+        degreeAngle = radAngle * 180.0 / Math.PI;
+        rotateObject(object, degreeAngle);
+    });
+});
+
+function createTransformStream(){
+    var _isTransforming = false,
+        isTransforming = function(){return _isTransforming;},
+        objectToTransform,
+        document_click = $(document).asEventStream("click").map(function(event){return $(event.target).closest('div');}),
+        object_click = document_click.filter(function(object){return object.hasClass("transformable")}),
+        outside_click = document_click.filter(function(object){return !object.hasClass("transformable") && !object.hasClass("z");}),
+        mouse_position = $(document).asEventStream("mousemove").map(function(event) { return {x: event.clientX, y: event.clientY}; }).toProperty({x: 0, y: 0}),
+        zebra_visible = function(){return $("#b_zebra").is(':visible');},
+        show_zebra = object_click.filter(function(){return !zebra_visible();}),
+        remove_zebra = outside_click.filter(function(){return zebra_visible();}),
+        mouse_up = $(document).asEventStream("mouseup").map(false),
+        mouse_down = $(document).asEventStream("mousedown").map(true),
+        mouse_button = mouse_up.merge(mouse_down).toProperty(false),
+        mouse_enter = $(".z_button").asEventStream("mouseenter").map(function(event){return $(event.target).closest('div').attr('data-function');}),
+        mouse_leave = $(".z_button").asEventStream("mouseleave").map(null),
+        current_button = mouse_enter.merge(mouse_leave).toProperty(null),
+        function_started = current_button.sampledBy(mouse_down.filter(current_button)).toProperty(),
+        drag = mouse_position.changes().filter(mouse_button).filter(isTransforming),
+        function_ended = mouse_up.filter(isTransforming),
+        start_state = function_started.changes().map(mouse_position).map(function(pos){
+            return [
+                pos,
+                objectToTransform.offset(),
+                {width: objectToTransform.width(), height: objectToTransform.height()},
+                objectToTransform
+            ];
+        });
+
     function_ended.onValue(function(){
-        isTransforming = false;
+        _isTransforming = false;
     });
     function_started.onValue(function(func){
-        isTransforming = true;
+        _isTransforming = true;
     });
     show_zebra.onValue(function(object){
         centerObjectToObject($("#b_zebra"), object);
@@ -62,7 +78,14 @@ $(function() {
     remove_zebra.onValue(function(object){
         $("#b_zebra").fadeOut(100);
     });
-});
+    return Bacon.combineAsArray(start_state, drag, function_started.changes().filter(function_started)).filter(isTransforming);
+}
+
+function transformFunctionFilter(func){
+    return function(params){
+        return params[2] === func;
+    }
+}
 
 function centerObjectToObject(objectToCenter, objectBase){
     var center = {
@@ -96,4 +119,33 @@ function rotateObject(object, degree) {
         '-o-transform': 'rotate(' + degree + 'deg)',
         'transform': 'rotate(' + degree + 'deg)'
     });
+}
+
+function createObjects(n, prefix){
+    var i, color,
+        top, left, width, height;
+    for(i=0;i<n;i++){
+        color = get_random_color();
+        top = Math.round(Math.random()*(window.innerHeight-100));
+        left = Math.round(Math.random()*(window.innerWidth-200));
+        height = Math.round(Math.random()*(window.innerHeight-top)/2)+30;
+        width = Math.round(Math.random()*(window.innerWidth-left)/3)+40;
+        $("body").prepend('<div id="b_object'+i+'" class="display_area transformable" style="'+
+            "background-color:"+color+";"+
+            "top:"+top+"px;"+
+            "left:"+left+"px;"+
+            "height:"+height+"px;"+
+            "line-height:"+height+"px;"+
+            "width:"+width+"px;"+
+            '"><span>'+prefix+(i+1)+'</span></div>');
+    }
+}
+
+function get_random_color() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.round(Math.random() * 15)];
+    }
+    return color;
 }

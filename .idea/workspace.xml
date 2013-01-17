@@ -65,7 +65,7 @@
       <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="21" column="76" selection-start="948" selection-end="948" vertical-scroll-proportion="-8.961538">
+            <state line="20" column="8" selection-start="706" selection-end="706" vertical-scroll-proportion="-8.269231">
               <folding />
             </state>
           </provider>
@@ -74,7 +74,7 @@
       <file leaf-file-name="main.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5" column="71" selection-start="365" selection-end="365" vertical-scroll-proportion="0.12">
+            <state line="10" column="27" selection-start="363" selection-end="363" vertical-scroll-proportion="0.048">
               <folding />
             </state>
           </provider>
@@ -92,7 +92,7 @@
       <file leaf-file-name="main.css" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/css/main.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="43" column="156" selection-start="849" selection-end="849" vertical-scroll-proportion="0.0">
+            <state line="52" column="158" selection-start="965" selection-end="965" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -462,20 +462,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/css/main.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="43" column="156" selection-start="849" selection-end="849" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="21" column="76" selection-start="948" selection-end="948" vertical-scroll-proportion="-8.961538">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/vendor/Bacon.js">
       <provider selected="true" editor-type-id="text-editor">
         <state line="1458" column="4" selection-start="40710" selection-end="40710" vertical-scroll-proportion="0.0">
@@ -483,9 +469,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="20" column="8" selection-start="706" selection-end="706" vertical-scroll-proportion="-8.269231">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/css/main.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="52" column="158" selection-start="965" selection-end="965" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/js/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5" column="71" selection-start="365" selection-end="365" vertical-scroll-proportion="0.12">
+        <state line="10" column="27" selection-start="363" selection-end="363" vertical-scroll-proportion="0.048">
           <folding />
         </state>
       </provider>
