@@ -129,7 +129,7 @@ function createObjects(n, prefix){
         top = Math.round(Math.random()*(window.innerHeight-100));
         left = Math.round(Math.random()*(window.innerWidth-200));
         height = Math.round(Math.random()*(window.innerHeight-top)/2)+30;
-        width = Math.round(Math.random()*(window.innerWidth-left)/3)+40;
+        width = Math.round(Math.random()*(window.innerWidth-left)/3)+60;
         $("body").prepend('<div id="b_object'+i+'" class="display_area transformable" style="'+
             "background-color:"+color+";"+
             "top:"+top+"px;"+
