@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7874ecca-e0b1-4dee-ac5d-4118167da134" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/css/main.css" afterPath="$PROJECT_DIR$/css/main.css" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/main.js" afterPath="$PROJECT_DIR$/js/main.js" />
     </list>
     <ignored path="baconjs-playground.iws" />
@@ -63,7 +65,7 @@
       <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="20" column="8" selection-start="706" selection-end="706" vertical-scroll-proportion="-8.269231">
+            <state line="26" column="155" selection-start="1334" selection-end="1334" vertical-scroll-proportion="-12.423077">
               <folding />
             </state>
           </provider>
@@ -72,7 +74,7 @@
       <file leaf-file-name="main.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="46" column="110" selection-start="2337" selection-end="2337" vertical-scroll-proportion="0.36">
+            <state line="10" column="20" selection-start="421" selection-end="421" vertical-scroll-proportion="0.24861878">
               <folding />
             </state>
           </provider>
@@ -90,7 +92,7 @@
       <file leaf-file-name="main.css" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/css/main.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="52" column="158" selection-start="965" selection-end="965" vertical-scroll-proportion="0.0">
+            <state line="86" column="156" selection-start="1402" selection-end="1402" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -109,8 +111,8 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/css/main.css" />
+        <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/js/main.js" />
       </list>
     </option>
@@ -467,23 +469,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
+    <entry file="file://$PROJECT_DIR$/css/main.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="8" selection-start="706" selection-end="706" vertical-scroll-proportion="-8.269231">
+        <state line="86" column="156" selection-start="1402" selection-end="1402" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/css/main.css">
+    <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="52" column="158" selection-start="965" selection-end="965" vertical-scroll-proportion="0.0">
+        <state line="26" column="155" selection-start="1334" selection-end="1334" vertical-scroll-proportion="-12.423077">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="46" column="110" selection-start="2337" selection-end="2337" vertical-scroll-proportion="0.36">
+        <state line="10" column="20" selection-start="421" selection-end="421" vertical-scroll-proportion="0.24861878">
           <folding />
         </state>
       </provider>
