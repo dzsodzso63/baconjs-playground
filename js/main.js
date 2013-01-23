@@ -5,15 +5,16 @@ $(function() {
         move = transform.filter(transformFunctionFilter("move")),
         scale = transform.filter(transformFunctionFilter("scale")),
         rotate = transform.filter(transformFunctionFilter("rotate")),
-        zebra_streams = createZebraStreams(),
+        zebra_streams = createZebraStreams("#col_1"),
         delete_command = createDeleteStream();
 
-    createObjects(10, "object_");
+    createObjects(5, "col_1", "object_");
 
     zebra_streams.show.onValue(function(object){
         centerObjectToObject($("#b_zebra"), object.parent());
         $("#b_zebra").fadeIn(100);
-        selectedObject = object;
+        selectedObject = Obj.objectByDomId[object.attr('id')];
+        console.log(selectedObject);
     });
     zebra_streams.hide.merge(delete_command).onValue(function(object){
         $("#b_zebra").fadeOut(100);
@@ -24,9 +25,8 @@ $(function() {
             startObjPos = params[0][1],
             curPos      = params[1],
             object      = params[0][3];
-        moveObject(object.parent(), startObjPos.left + (curPos.x - startCurPos.x), startObjPos.top + (curPos.y - startCurPos.y));
+        selectedObject.position(startObjPos.left + (curPos.x - startCurPos.x), startObjPos.top + (curPos.y - startCurPos.y));
         centerObjectToObject($("#b_zebra"), object.parent());
-        rePositionWrapper(object);
     });
     scale.onValue(function(params){
         var startCurPos  = params[0][0],
@@ -35,10 +35,7 @@ $(function() {
             curPos       = params[1],
             scale, wrapperSize;
         scale = Math.pow(3,((curPos.x - startCurPos.x)/1000));
-        resizeObject(object, startObjSize.width * scale, startObjSize.height * scale);
-        wrapperSize = Math.round(Math.sqrt(Math.pow(object.width(),2)+Math.pow(object.height(),2)));
-        resizeObject(object.parent(), wrapperSize, wrapperSize);
-        rePositionWrapper(object);
+        selectedObject.size(startObjSize.width * scale, startObjSize.height * scale);
     });
     rotate.onValue(function(params){
         var startCurPos = params[0][0],
@@ -47,19 +44,19 @@ $(function() {
             radAngle, degreeAngle;
         radAngle = Math.atan2((curPos.y - startCurPos.y), (curPos.x - startCurPos.x));
         degreeAngle = radAngle * 180.0 / Math.PI;
-        rotateObject(object, degreeAngle);
+        selectedObject.rotation(degreeAngle);
     });
     delete_command.onValue(function(){
-        selectedObject.parent().fadeOut(300, function(){ $(this).remove();});;
+        selectedObject.domObject().parent().fadeOut(300, function(){ $(this).remove();});;
     });
 });
 
-function createZebraStreams(){
-    var document_click = $(document).asEventStream("click").map(function(event){return $(event.target).closest('div');}),
+function createZebraStreams(zebraBlock){
+    var document_click = $(zebraBlock).asEventStream("click").map(function(event){return $(event.target).closest('div');}),
         object_click = document_click.filter(function(object){return object.hasClass("transformable")}),
         outside_click = document_click.filter(function(object){return !object.hasClass("transformable") && !object.hasClass("z");}),
         zebra_visible = function(){return $("#b_zebra").is(':visible');},
-        show_zebra = object_click.filter(function(obj){return !zebra_visible() || (obj[0]!=selectedObject[0]);}),
+        show_zebra = object_click.filter(function(obj){return !zebra_visible() || (obj[0]!=selectedObject.domObject()[0]);}),
         remove_zebra = outside_click.filter(function(){return zebra_visible();});
     zebraButtonAvailable = (
         show_zebra
@@ -90,9 +87,9 @@ function createTransformStream(){
         start_state = function_started.changes().map(mouse_position).map(function(pos){
             return [
                 pos,
-                selectedObject.parent().offset(),
-                {width: selectedObject.width(), height: selectedObject.height()},
-                selectedObject
+                selectedObject.position(),
+                {width: selectedObject.domObject().width(), height: selectedObject.domObject().height()},
+                selectedObject.domObject()
             ];
         });
     function_ended.onValue(function(){
@@ -151,44 +148,19 @@ function resizeObject(object, w, h){
     object.css('line-height', Math.round(h) + "px");
 }
 
-function rotateObject(object, degree) {
-    object.css({
-        '-webkit-transform': 'rotate(' + degree + 'deg)',
-        '-moz-transform': 'rotate(' + degree + 'deg)',
-        '-ms-transform': 'rotate(' + degree + 'deg)',
-        '-o-transform': 'rotate(' + degree + 'deg)',
-        'transform': 'rotate(' + degree + 'deg)'
-    });
-}
-
-function createObjects(n, prefix){
-    var i, color,
+function createObjects(n, block){
+    var i, color, obj,
         top, left, width, height, size;
     for(i=0;i<n;i++){
         color = get_random_color();
         top = Math.round(Math.random()*(window.innerHeight-100));
-        left = Math.round(Math.random()*(window.innerWidth-200));
+        left = Math.round(Math.random()*($("#" + block).width()-200));
         height = Math.round(Math.random()*(window.innerHeight-top)/2)+30;
-        width = Math.round(Math.random()*(window.innerWidth-left)/3)+60;
-        size = Math.round(Math.sqrt(Math.pow(width,2)+Math.pow(height,2)));
-        $("body").prepend('<div id="b_object'+i+'_wrapper" class="wrapper" style="'+
-            "top:"+top+"px;"+
-            "left:"+left+"px;"+
-            "height:"+size+"px;"+
-            "width:"+size+"px;"+
-            '"><div id="b_object'+i+'" class="display_area transformable" style="'+
-            "background-color:"+color+";"+
-            "height:"+height+"px;"+
-            "line-height:"+height+"px;"+
-            "width:"+width+"px;"+
-            '"><span>'+prefix+(i+1)+'</span></div></div>');
-        rePositionWrapper($("#b_object"+i));
-    }
-}
+        width = Math.round(Math.random()*($("#" + block).width()-left)/3)+60;
 
-function rePositionWrapper(object){
-    var wrapper = object.parent();
-    object.css('top', (wrapper.height()-object.height())/2).css('left', (wrapper.width()-object.width())/2);
+        obj = new Obj(block, i, left, top, width, height);
+        obj.color(color);
+    }
 }
 
 function get_random_color() {

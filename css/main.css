@@ -24,9 +24,8 @@ body {
 }
 
 .display_area {
-    position: absolute;
+    position: relative;
     padding: 0px;
-    _border: 1px solid;
     opacity: .7;
     text-align: center;
     vertical-align: middle;
@@ -47,9 +46,7 @@ body {
 #b_zebra {
     background: #000;
     width: 50px;
-    height: 110px;
-    top: 200px;
-    left: 100px;
+    height: 95px;
 }
 
 .z_button{
@@ -65,17 +62,17 @@ body {
 }
 #b_z_scale {
     background: #1b5;
-    top: 30px;
+    top: 5px;
     left: 0px;
 }
 #b_z_rotate {
     background: #1be;
-    top: 60px;
+    top: 10px;
     left: 0px;
 }
 #b_z_delete {
     background: #ab5;
-    top: 90px;
+    top: 15px;
     left: 0px;
 }
 
@@ -84,6 +81,7 @@ body {
 }
 
 .wrapper {
+    /*background-color: #eee;*/
     position: absolute;
     z-index: -100;
     pointer-events: none;
@@ -116,6 +114,24 @@ hr {
     border-top: 1px solid #ccc;
     margin: 1em 0;
     padding: 0;
+}
+
+.col {
+    position: fixed;
+    width: 50%;
+    top: 0px;
+    bottom: 0px;
+    border: 1px solid;
+    overflow: hidden;
+}
+
+#col_1 {
+    float: left;
+}
+
+#col_2 {
+    float: right;
+    left: 50%;
 }
 
 /*
