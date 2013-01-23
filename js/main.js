@@ -8,13 +8,15 @@ $(function() {
         zebra_streams = createZebraStreams("#col_1"),
         delete_command = createDeleteStream();
 
-    createObjects(5, "col_1", "object_");
-
+    Obj.loadAll();
+    $("#col_1_add_object").asEventStream("click").onValue(function(){
+        createObjects(1, "col_1");
+    });
     zebra_streams.show.onValue(function(object){
         centerObjectToObject($("#b_zebra"), object.parent());
         $("#b_zebra").fadeIn(100);
         selectedObject = Obj.objectByDomId[object.attr('id')];
-        console.log(selectedObject);
+        //console.log(selectedObject);
     });
     zebra_streams.hide.merge(delete_command).onValue(function(object){
         $("#b_zebra").fadeOut(100);
@@ -25,7 +27,7 @@ $(function() {
             startObjPos = params[0][1],
             curPos      = params[1],
             object      = params[0][3];
-        selectedObject.position(startObjPos.left + (curPos.x - startCurPos.x), startObjPos.top + (curPos.y - startCurPos.y));
+        selectedObject.moveStream.push({left: startObjPos.left + (curPos.x - startCurPos.x), top: startObjPos.top + (curPos.y - startCurPos.y)});
         centerObjectToObject($("#b_zebra"), object.parent());
     });
     scale.onValue(function(params){
@@ -47,7 +49,7 @@ $(function() {
         selectedObject.rotation(degreeAngle);
     });
     delete_command.onValue(function(){
-        selectedObject.domObject().parent().fadeOut(300, function(){ $(this).remove();});;
+        selectedObject.delete();
     });
 });
 
@@ -94,6 +96,7 @@ function createTransformStream(){
         });
     function_ended.onValue(function(){
         _isTransforming = false;
+        selectedObject.persistStream.push()
     });
     function_started.onValue(function(func){
         _isTransforming = true;
@@ -158,8 +161,7 @@ function createObjects(n, block){
         height = Math.round(Math.random()*(window.innerHeight-top)/2)+30;
         width = Math.round(Math.random()*($("#" + block).width()-left)/3)+60;
 
-        obj = new Obj(block, i, left, top, width, height);
-        obj.color(color);
+        obj = new Obj(block, i, left, top, width, height, color);
     }
 }
 

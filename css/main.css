@@ -21,6 +21,8 @@ textarea {
 body {
     font-size: 1em;
     line-height: 1.4;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .display_area {
@@ -59,21 +61,25 @@ body {
     background: #6b2;
     top: 0px;
     left: 0px;
+    cursor: move;
 }
 #b_z_scale {
     background: #1b5;
     top: 5px;
     left: 0px;
+    cursor: col-resize;
 }
 #b_z_rotate {
     background: #1be;
     top: 10px;
     left: 0px;
+    cursor: crosshair;
 }
 #b_z_delete {
     background: #ab5;
     top: 15px;
     left: 0px;
+    cursor: pointer;
 }
 
 .zebra-container {
@@ -85,6 +91,22 @@ body {
     position: absolute;
     z-index: -100;
     pointer-events: none;
+}
+
+.add_object {
+    position: relative;
+    top: 5px;
+    left: 5px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    background-color: #eee;
+    opacity: .7;
+    text-align: center;
+    border: 1px solid;
+    cursor: pointer;
+    cursor: hand;
+    user-select: none;
 }
 
 /*
@@ -123,6 +145,8 @@ hr {
     bottom: 0px;
     border: 1px solid;
     overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #col_1 {
