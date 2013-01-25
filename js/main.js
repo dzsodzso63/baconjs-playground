@@ -1,43 +1,32 @@
-var selectedObject, zebraButtonAvailable;
+var zebraButtonAvailable;
 
 $(function() {
     var transform = createTransformStream(),
         move = transform.filter(transformFunctionFilter("move")),
-        scale = transform.filter(transformFunctionFilter("scale")),
         rotate = transform.filter(transformFunctionFilter("rotate")),
         zebra_streams = createZebraStreams("#col_1"),
-        delete_command = createDeleteStream();
+        delete_command = createDeleteStream(),
+        currentObject = Bacon.latestValue(Obj.selectedObject);
 
+    Obj.transformStream(transform);
     Obj.loadAll();
+
     $("#col_1_add_object").asEventStream("click").onValue(function(){
         createObjects(1, "col_1");
     });
     zebra_streams.show.onValue(function(object){
         centerObjectToObject($("#b_zebra"), object.parent());
         $("#b_zebra").fadeIn(100);
-        selectedObject = Obj.objectByDomId[object.attr('id')];
+        Obj.selectedObject.push(Obj.objectByDomId[object.attr('id')]);
         //console.log(selectedObject);
     });
     zebra_streams.hide.merge(delete_command).onValue(function(object){
+        Obj.selectedObject.push(null);
         $("#b_zebra").fadeOut(100);
     });
 
     move.onValue(function(params){
-        var startCurPos = params[0][0],
-            startObjPos = params[0][1],
-            curPos      = params[1],
-            object      = params[0][3];
-        selectedObject.moveStream.push({left: startObjPos.left + (curPos.x - startCurPos.x), top: startObjPos.top + (curPos.y - startCurPos.y)});
-        centerObjectToObject($("#b_zebra"), object.parent());
-    });
-    scale.onValue(function(params){
-        var startCurPos  = params[0][0],
-            startObjSize = params[0][2],
-            object       = params[0][3],
-            curPos       = params[1],
-            scale, wrapperSize;
-        scale = Math.pow(3,((curPos.x - startCurPos.x)/1000));
-        selectedObject.size(startObjSize.width * scale, startObjSize.height * scale);
+        centerObjectToObject($("#b_zebra"), currentObject().domObject().parent());
     });
     rotate.onValue(function(params){
         var startCurPos = params[0][0],
@@ -49,7 +38,7 @@ $(function() {
         selectedObject.rotation(degreeAngle);
     });
     delete_command.onValue(function(){
-        selectedObject.delete();
+        selectedObject.deleteStream.push().combineTemplate();
     });
 });
 
@@ -58,8 +47,9 @@ function createZebraStreams(zebraBlock){
         object_click = document_click.filter(function(object){return object.hasClass("transformable")}),
         outside_click = document_click.filter(function(object){return !object.hasClass("transformable") && !object.hasClass("z");}),
         zebra_visible = function(){return $("#b_zebra").is(':visible');},
-        show_zebra = object_click.filter(function(obj){return !zebra_visible() || (obj[0]!=selectedObject.domObject()[0]);}),
-        remove_zebra = outside_click.filter(function(){return zebra_visible();});
+        show_zebra = object_click.filter(function(obj){return !zebra_visible() || (obj[0]!=currentObject().domObject()[0]);}),
+        remove_zebra = outside_click.filter(function(){return zebra_visible();}),
+        currentObject = Bacon.latestValue(Obj.selectedObject);
     zebraButtonAvailable = (
         show_zebra
             .delay(300)
@@ -74,8 +64,8 @@ function createZebraStreams(zebraBlock){
 }
 
 function createTransformStream(){
-    var _isTransforming = false,
-        isTransforming = function(){return _isTransforming;},
+    var transforming = (new Bacon.Bus()),
+        isTransforming = transforming.toProperty(false),
         mouse_position = $(document).asEventStream("mousemove").merge($(document).asEventStream("mousedown")).map(function(event) { return {x: event.clientX, y: event.clientY}; }).toProperty({x: 0, y: 0}),
         mouse_up = $(document).asEventStream("mouseup").map(false),
         mouse_down = $(document).asEventStream("mousedown").map(true),
@@ -87,29 +77,34 @@ function createTransformStream(){
         drag = mouse_position.changes().filter(mouse_button_pressed).filter(isTransforming),
         function_ended = mouse_up.filter(isTransforming),
         start_state = function_started.changes().map(mouse_position).map(function(pos){
-            return [
-                pos,
-                selectedObject.position(),
-                {width: selectedObject.domObject().width(), height: selectedObject.domObject().height()},
-                selectedObject.domObject()
-            ];
-        });
+            return {
+                startMousePos: pos,
+                startObjectPos: currentObject().position(),
+                startObjectSize: {width: currentObject().domObject().width(), height: currentObject().domObject().height()}
+            };
+        }),
+        startMousePos = mouse_position.sampledBy(mouse_down),
+        currentObject = Bacon.latestValue(Obj.selectedObject);
+
     function_ended.onValue(function(){
-        _isTransforming = false;
-        selectedObject.persistStream.push()
+        transforming.push(false);
+        currentObject().persistStream.push()
     });
     function_started.onValue(function(func){
-        _isTransforming = true;
+        transforming.push(true);
     });
-    return (Bacon.combineAsArray(start_state, drag,
-            function_started
+    return (
+        Bacon.combineTemplate({
+            startState: start_state,
+            cursorPosition: drag,
+            type: function_started
                 .changes()
                 .filter(function_started)
-            )
-        .filter(isTransforming)
-        .toProperty()
-        .sampledBy($(document).asEventStream("mousemove"))
-        .filter(isTransforming)
+        })
+            .filter(isTransforming)
+            .toProperty()
+            .sampledBy($(document).asEventStream("mousemove"))
+            .filter(isTransforming)
     );
 }
 
@@ -123,7 +118,7 @@ function createDeleteStream(){
 
 function transformFunctionFilter(func){
     return (function(params){
-        return params[2] === func;
+        return params.type === func;
     })
 }
 

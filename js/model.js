@@ -8,6 +8,12 @@
 
     Obj.objectByDomId = {};
 
+    Obj.Transform = {
+      move: "move",
+      scale: "scale",
+      rotate: "rotate"
+    };
+
     Obj.loadAll = function() {
       var i, _i, _ref, _results;
       _results = [];
@@ -34,6 +40,15 @@
       }
     };
 
+    Obj.transformStream = function(trans) {
+      if (trans != null) {
+        Obj.globalTransformStream = trans;
+      }
+      return Obj.globalTransformStream;
+    };
+
+    Obj.selectedObject = new Bacon.Bus();
+
     function Obj(canvas, id, left, top, width, height, colorCode, deg) {
       this.canvas = canvas;
       this.id = id;
@@ -43,31 +58,69 @@
       this.height = height;
       this.colorCode = colorCode;
       this.deg = deg;
+      this.deleteThis = __bind(this.deleteThis, this);
+
       this.persist = __bind(this.persist, this);
 
       this.toJSON = __bind(this.toJSON, this);
 
       this.position = __bind(this.position, this);
 
+      this.size = __bind(this.size, this);
+
+      this.transformStream = __bind(this.transformStream, this);
+
+      this.createStreams = __bind(this.createStreams, this);
+
       if (!this.id) {
         this.id = parseInt(Obj.objectCount(), 10) + 1;
       }
       this.domId = 'b_' + this.canvas + '_' + Obj.prefix + this.id;
       this.createObject();
-      this.size(this.width, this.height);
+      this.size({
+        width: this.width,
+        height: this.height
+      });
       this.position({
         left: this.left,
         top: this.top
       });
       this.rotation(this.deg || 0);
       this.color(this.colorCode);
+      this.createStreams();
+      this.persistStream.push();
       Obj.objectByDomId[this.domId] = this;
+    }
+
+    Obj.prototype.createStreams = function() {
+      var _this = this;
       this.persistStream = new Bacon.Bus();
       this.persistStream.onValue(this.persist);
-      this.persistStream.push();
-      this.moveStream = new Bacon.Bus();
-      this.moveStream.onValue(this.position);
-    }
+      this.selectionFilter = Obj.selectedObject.map(function(obj) {
+        return (obj != null ? obj.id : void 0) === _this.id;
+      }).toProperty();
+      this.transformStream(Obj.globalTransformStream.filter(this.selectionFilter));
+      this.deleteStream = new Bacon.Bus();
+      return this.deleteStream.onValue(this.deleteThis);
+    };
+
+    Obj.prototype.transformStream = function(stream) {
+      if (stream != null) {
+        this._transformStream = stream;
+        this.moveStream = this._transformStream.filter(function(trans) {
+          return trans.type === Obj.Transform.move;
+        });
+        this.scaleStream = this._transformStream.filter(function(trans) {
+          return trans.type === Obj.Transform.scale;
+        });
+        this.rotateStream = this._transformStream.filter(function(trans) {
+          return trans.type === Obj.Transform.rotate;
+        });
+        this.moveStream.onValue(this.position);
+        this.scaleStream.onValue(this.size);
+      }
+      return this._transformStream;
+    };
 
     Obj.prototype.wrapperSize = function() {
       return Math.round(Math.sqrt(Math.pow(this.width, 2) + Math.pow(this.height, 2)));
@@ -93,14 +146,27 @@
       return this.colorCode;
     };
 
-    Obj.prototype.size = function(to_width, to_height) {
-      if ((to_width != null) && (to_height != null)) {
-        this.position({
-          left: this.left - ((to_width - this.width) / 2),
-          top: this.top - ((to_height - this.height) / 2)
-        });
-        this.width = to_width;
-        this.height = to_height;
+    Obj.prototype.size = function(to) {
+      var scale, to_height, to_width;
+      if (to != null) {
+        if ((to.width != null) && (to.height != null)) {
+          this.position({
+            left: this.left - ((to.width - this.width) / 2),
+            top: this.top - ((to.height - this.height) / 2)
+          });
+          this.width = to.width;
+          this.height = to.height;
+        } else {
+          scale = Math.pow(3, (to.cursorPosition.x - to.startState.startMousePos.x) / 1000);
+          to_width = to.startState.startObjectSize.width * scale;
+          to_height = to.startState.startObjectSize.height * scale;
+          this.position({
+            left: this.left - ((to_width - this.width) / 2),
+            top: this.top - ((to_height - this.height) / 2)
+          });
+          this.width = to_width;
+          this.height = to_height;
+        }
         this.domObject().css('width', Math.round(this.width)).css('height', Math.round(this.height)).css('line-height', Math.round(this.height) + 'px');
         this.domObject().parent().css('width', this.wrapperSize()).css('height', this.wrapperSize());
       }
@@ -111,9 +177,14 @@
     };
 
     Obj.prototype.position = function(to) {
-      if ((to != null) && (to.left != null) && (to.top != null)) {
-        this.left = to.left;
-        this.top = to.top;
+      if (to != null) {
+        if ((to.left != null) && (to.top != null)) {
+          this.left = to.left;
+          this.top = to.top;
+        } else {
+          this.left = to.startState.startObjectPos.left + (to.cursorPosition.x - to.startState.startMousePos.x);
+          this.top = to.startState.startObjectPos.top + (to.cursorPosition.y - to.startState.startMousePos.y);
+        }
         this.domObject().parent().css('left', Math.round(this.left - (this.wrapperSize() - this.width) / 2)).css('top', Math.round(this.top - (this.wrapperSize() - this.height) / 2));
         this.rePositionInWrapper();
       }
@@ -167,7 +238,7 @@
       }
     };
 
-    Obj.prototype["delete"] = function() {
+    Obj.prototype.deleteThis = function() {
       this.domObject().parent().fadeOut(300, function() {
         return $(this).remove();
       });
@@ -176,6 +247,6 @@
 
     return Obj;
 
-  })();
+  }).call(this);
 
 }).call(this);
