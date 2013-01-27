@@ -11,7 +11,7 @@
 
     FlashMessage.message = function(text) {
       FlashMessage.domObject.html(text);
-      return FlashMessage.domObject.fadeIn(300).delay(1200).fadeOut(600);
+      return FlashMessage.domObject.fadeIn(200).delay(1200).fadeOut(1000);
     };
 
     return FlashMessage;
