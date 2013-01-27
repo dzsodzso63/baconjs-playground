@@ -19,12 +19,11 @@
     };
 
     Obj.loadAll = function() {
-      var i, _i, _ref, _results;
-      _results = [];
+      var i, _i, _ref;
       for (i = _i = 0, _ref = Obj.objectCount(); 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.loadObject(i));
+        this.loadObject(i);
       }
-      return _results;
+      return FlashMessage.message("Objects loaded.");
     };
 
     Obj.objectCount = function() {
@@ -54,6 +53,7 @@
     Obj.selectedObject = new Bacon.Bus();
 
     function Obj(canvas, id, left, top, width, height, colorCode, deg) {
+      var isNew;
       this.canvas = canvas;
       this.id = id;
       this.left = left;
@@ -78,8 +78,10 @@
 
       this.createStreams = __bind(this.createStreams, this);
 
+      isNew = false;
       if (!this.id) {
         this.id = parseInt(Obj.objectCount(), 10) + 1;
+        isNew = true;
       }
       this.domId = 'b_' + this.canvas + '_' + Obj.prefix + this.id;
       this.createObject();
@@ -96,7 +98,9 @@
       });
       this.color(this.colorCode);
       this.createStreams();
-      this.persistStream.push();
+      if (isNew) {
+        this.persistStream.push();
+      }
       Obj.objectByDomId[this.domId] = this;
     }
 
@@ -241,15 +245,17 @@
       jsonData = JSON.stringify(this);
       localStorage.setItem(this.storeKey(), jsonData);
       if (this.id > Obj.objectCount()) {
-        return localStorage.setItem("object_count", this.id);
+        localStorage.setItem("object_count", this.id);
       }
+      return FlashMessage.message("Saved.");
     };
 
     Obj.prototype.deleteThis = function() {
       this.domObject().parent().fadeOut(300, function() {
         return $(this).remove();
       });
-      return localStorage.removeItem(this.storeKey());
+      localStorage.removeItem(this.storeKey());
+      return FlashMessage.message("Object deleted.");
     };
 
     return Obj;

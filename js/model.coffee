@@ -5,6 +5,8 @@ class window.Obj extends DisplayObject
   @loadAll: ->
     for i in [0..Obj.objectCount()]
       @loadObject(i)
+    FlashMessage.message "Objects loaded."
+
   @objectCount: ->
     localStorage.getItem("object_count") || 0
   @storeKey: (id) ->
@@ -21,8 +23,10 @@ class window.Obj extends DisplayObject
   @selectedObject: (new Bacon.Bus())
 
   constructor: (@canvas, @id, @left, @top, @width, @height, @colorCode, @deg) ->
+    isNew = false
     if !@id
       @id = parseInt(Obj.objectCount(), 10) + 1
+      isNew = true
     @domId = 'b_' + @canvas + '_' + Obj.prefix + @id
     @createObject()
     @size({width: @width, height: @height})
@@ -30,7 +34,7 @@ class window.Obj extends DisplayObject
     @rotation({deg: @deg || 0})
     @color(@colorCode)
     @createStreams()
-    @persistStream.push()
+    @persistStream.push() if isNew
     Obj.objectByDomId[@domId] = @
 
   createStreams: =>
@@ -143,9 +147,11 @@ class window.Obj extends DisplayObject
     localStorage.setItem(@storeKey(), jsonData)
     if @id > Obj.objectCount()
       localStorage.setItem("object_count", @id)
+    FlashMessage.message "Saved."
 
   deleteThis: =>
     @domObject().parent().fadeOut(300, ->
       $(this).remove()
     )
     localStorage.removeItem(@storeKey())
+    FlashMessage.message "Object deleted."
