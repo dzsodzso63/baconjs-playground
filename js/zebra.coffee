@@ -1,8 +1,13 @@
 class window.Zebra extends DisplayObject
-  constructor: (@canvas) ->
+  constructor: (@canvas, @model) ->
     @domId = 'b_' + @canvas + '_b_zebra'
     @createObject()
     @createStreams()
+    @selectObjectBus = model.selectedObject
+    @currentObject = Bacon.latestValue(@selectObjectBus)
+    @selectObjectBus.flatMapLatest((obj)=> obj?.moveStream || Bacon.never()).onValue(@followMove)
+    @transformStream = @createTransformStream()
+    model.transformStream(@transformStream)
 
   createObject: =>
     $("##{@canvas}").prepend('<div id="' + @domId + '" class="zebra display_area z" style="display: none;">
@@ -14,14 +19,6 @@ class window.Zebra extends DisplayObject
     		        </div>
     	        </div>
     ')
-
-  model: (model) =>
-    if model?
-      @model = model
-      @selectObjectBus = model.selectedObject
-      @currentObject = Bacon.latestValue(@selectObjectBus)
-      @selectObjectBus.flatMapLatest((obj)=> obj?.moveStream || Bacon.never()).onValue(@followMove)
-    @model
 
   displayStreams: (streams) =>
     if streams?.show?
@@ -45,7 +42,7 @@ class window.Zebra extends DisplayObject
     @domObject().fadeOut(100)
 
   createStreams: =>
-    document_click = $("##{@canvas}").asEventStream("click").map((event)=> $(event.target).closest('div'))
+    document_click = @scope().asEventStream("click").map((event)=> $(event.target).closest('div'))
     object_click = document_click.filter((object)=> object.hasClass("transformable"))
     outside_click = document_click.filter((object)=> !object.hasClass("transformable") && !object.hasClass("z"))
     zebra_visible = => @domObject().is(':visible')
@@ -70,3 +67,51 @@ class window.Zebra extends DisplayObject
   deleteObject: =>
     @currentObject().deleteStream.push()
     @hide()
+
+  scope: =>
+    $("##{@canvas}")
+
+  createTransformStream: =>
+    transforming = new Bacon.Bus()
+    isTransforming = transforming.toProperty(false)
+    mouse_position = @scope().asEventStream("mousemove").merge($(document).asEventStream("mousedown")).map((event)=> {x: event.clientX, y: event.clientY}).toProperty({x: 0, y: 0})
+    mouse_up = @scope().asEventStream("mouseup").map(false)
+    mouse_down = @scope().asEventStream("mousedown").map(true)
+    mouse_button_pressed = mouse_up.merge(mouse_down).toProperty(false)
+    mouse_enter = $(".transform_aea").asEventStream("mouseenter").map((event)=> $(event.target).closest('div').attr('data-function'))
+    mouse_leave = $(".transform_aea").asEventStream("mouseleave").map(null)
+    current_button = mouse_enter.merge(mouse_leave).toProperty(null)
+    function_started = current_button.sampledBy(mouse_down.filter(current_button)).toProperty()
+    drag = mouse_position.changes().filter(mouse_button_pressed).filter(isTransforming)
+    function_ended = mouse_up.filter(isTransforming)
+    start_state = function_started.changes().map(mouse_position).map((pos) =>
+      {
+        startMousePos: pos
+        startObjectPos: currentObject().position()
+        startObjectSize: {width: currentObject().domObject().width(), height: currentObject().domObject().height()}
+      }
+    )
+    startMousePos = mouse_position.sampledBy(mouse_down)
+    currentObject = Bacon.latestValue(Obj.selectedObject)
+
+    function_ended.onValue( =>
+      transforming.push(false)
+      currentObject().persistStream.push()
+    )
+
+    function_started.onValue((func) =>
+      transforming.push(true)
+    )
+    (
+      Bacon.combineTemplate({
+        startState: start_state
+        cursorPosition: drag
+        type: function_started
+          .changes()
+          .filter(function_started)
+        })
+          .filter(isTransforming)
+          .toProperty()
+          .sampledBy($(document).asEventStream("mousemove"))
+          .filter(isTransforming)
+    )

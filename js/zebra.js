@@ -8,8 +8,14 @@
 
     __extends(Zebra, _super);
 
-    function Zebra(canvas) {
+    function Zebra(canvas, model) {
+      var _this = this;
       this.canvas = canvas;
+      this.model = model;
+      this.createTransformStream = __bind(this.createTransformStream, this);
+
+      this.scope = __bind(this.scope, this);
+
       this.deleteObject = __bind(this.deleteObject, this);
 
       this.createStreams = __bind(this.createStreams, this);
@@ -22,13 +28,18 @@
 
       this.displayStreams = __bind(this.displayStreams, this);
 
-      this.model = __bind(this.model, this);
-
       this.createObject = __bind(this.createObject, this);
 
       this.domId = 'b_' + this.canvas + '_b_zebra';
       this.createObject();
       this.createStreams();
+      this.selectObjectBus = model.selectedObject;
+      this.currentObject = Bacon.latestValue(this.selectObjectBus);
+      this.selectObjectBus.flatMapLatest(function(obj) {
+        return (obj != null ? obj.moveStream : void 0) || Bacon.never();
+      }).onValue(this.followMove);
+      this.transformStream = this.createTransformStream();
+      model.transformStream(this.transformStream);
     }
 
     Zebra.prototype.createObject = function() {
@@ -41,19 +52,6 @@
     		        </div>\
     	        </div>\
     ');
-    };
-
-    Zebra.prototype.model = function(model) {
-      var _this = this;
-      if (model != null) {
-        this.model = model;
-        this.selectObjectBus = model.selectedObject;
-        this.currentObject = Bacon.latestValue(this.selectObjectBus);
-        this.selectObjectBus.flatMapLatest(function(obj) {
-          return (obj != null ? obj.moveStream : void 0) || Bacon.never();
-        }).onValue(this.followMove);
-      }
-      return this.model;
     };
 
     Zebra.prototype.displayStreams = function(streams) {
@@ -90,7 +88,7 @@
     Zebra.prototype.createStreams = function() {
       var deleteStream, document_click, object_click, outside_click, remove_zebra, show_zebra, zebraButtonAvailable, zebra_visible,
         _this = this;
-      document_click = $("#" + this.canvas).asEventStream("click").map(function(event) {
+      document_click = this.scope().asEventStream("click").map(function(event) {
         return $(event.target).closest('div');
       });
       object_click = document_click.filter(function(object) {
@@ -120,6 +118,61 @@
     Zebra.prototype.deleteObject = function() {
       this.currentObject().deleteStream.push();
       return this.hide();
+    };
+
+    Zebra.prototype.scope = function() {
+      return $("#" + this.canvas);
+    };
+
+    Zebra.prototype.createTransformStream = function() {
+      var currentObject, current_button, drag, function_ended, function_started, isTransforming, mouse_button_pressed, mouse_down, mouse_enter, mouse_leave, mouse_position, mouse_up, startMousePos, start_state, transforming,
+        _this = this;
+      transforming = new Bacon.Bus();
+      isTransforming = transforming.toProperty(false);
+      mouse_position = this.scope().asEventStream("mousemove").merge($(document).asEventStream("mousedown")).map(function(event) {
+        return {
+          x: event.clientX,
+          y: event.clientY
+        };
+      }).toProperty({
+        x: 0,
+        y: 0
+      });
+      mouse_up = this.scope().asEventStream("mouseup").map(false);
+      mouse_down = this.scope().asEventStream("mousedown").map(true);
+      mouse_button_pressed = mouse_up.merge(mouse_down).toProperty(false);
+      mouse_enter = $(".transform_aea").asEventStream("mouseenter").map(function(event) {
+        return $(event.target).closest('div').attr('data-function');
+      });
+      mouse_leave = $(".transform_aea").asEventStream("mouseleave").map(null);
+      current_button = mouse_enter.merge(mouse_leave).toProperty(null);
+      function_started = current_button.sampledBy(mouse_down.filter(current_button)).toProperty();
+      drag = mouse_position.changes().filter(mouse_button_pressed).filter(isTransforming);
+      function_ended = mouse_up.filter(isTransforming);
+      start_state = function_started.changes().map(mouse_position).map(function(pos) {
+        return {
+          startMousePos: pos,
+          startObjectPos: currentObject().position(),
+          startObjectSize: {
+            width: currentObject().domObject().width(),
+            height: currentObject().domObject().height()
+          }
+        };
+      });
+      startMousePos = mouse_position.sampledBy(mouse_down);
+      currentObject = Bacon.latestValue(Obj.selectedObject);
+      function_ended.onValue(function() {
+        transforming.push(false);
+        return currentObject().persistStream.push();
+      });
+      function_started.onValue(function(func) {
+        return transforming.push(true);
+      });
+      return Bacon.combineTemplate({
+        startState: start_state,
+        cursorPosition: drag,
+        type: function_started.changes().filter(function_started)
+      }).filter(isTransforming).toProperty().sampledBy($(document).asEventStream("mousemove")).filter(isTransforming);
     };
 
     return Zebra;
