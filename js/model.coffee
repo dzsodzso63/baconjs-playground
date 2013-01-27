@@ -1,4 +1,4 @@
-class window.Obj
+class window.Obj extends DisplayObject
   @prefix: "object_"
   @objectByDomId: {}
   @Transform: {move: "move", scale: "scale", rotate: "rotate"}
@@ -27,7 +27,7 @@ class window.Obj
     @createObject()
     @size({width: @width, height: @height})
     @position({left: @left, top: @top})
-    @rotation(@deg || 0)
+    @rotation({deg: @deg || 0})
     @color(@colorCode)
     @createStreams()
     @persistStream.push()
@@ -49,16 +49,14 @@ class window.Obj
       @rotateStream = @_transformStream.filter((trans)-> return (trans.type==Obj.Transform.rotate))
       @moveStream.onValue(@position)
       @scaleStream.onValue(@size)
+      @rotateStream.onValue(@rotation)
     @_transformStream
 
   wrapperSize: ->
     Math.round(Math.sqrt(Math.pow(@width,2)+Math.pow(@height,2)))
 
   rePositionInWrapper: ->
-    @positionInWrapper(((@wrapperSize()-@height) / 2),  ((@wrapperSize()-@width) / 2))
-
-  domObject: ->
-    $("##{@domId}")
+    @moveObject(((@wrapperSize()-@width) / 2), ((@wrapperSize()-@height) / 2))
 
   createObject: ->
     $("##{@canvas}").prepend(
@@ -109,20 +107,19 @@ class window.Obj
       @rePositionInWrapper()
     {left: @left, top: @top}
 
-  positionInWrapper: (x,y)->
-    @domObject()
-      .css('top', Math.round(x))
-      .css('left', Math.round(y))
-
-  rotation: (degree)->
-    if degree?
-      @deg = degree
+  rotation: (to) =>
+    if to?
+      if to.deg?
+        @deg = to.deg
+      else
+        radAngle = Math.atan2((to.cursorPosition.y - to.startState.startMousePos.y), (to.cursorPosition.x - to.startState.startMousePos.x));
+        @deg = radAngle * 180.0 / Math.PI;
       @domObject().css({
-        '-webkit-transform': 'rotate(' + degree + 'deg)'
-        '-moz-transform': 'rotate(' + degree + 'deg)'
-        '-ms-transform': 'rotate(' + degree + 'deg)'
-        '-o-transform': 'rotate(' + degree + 'deg)'
-        'transform': 'rotate(' + degree + 'deg)'
+        '-webkit-transform': 'rotate(' + @deg + 'deg)'
+        '-moz-transform': 'rotate(' + @deg + 'deg)'
+        '-ms-transform': 'rotate(' + @deg + 'deg)'
+        '-o-transform': 'rotate(' + @deg + 'deg)'
+        'transform': 'rotate(' + @deg + 'deg)'
       })
     @deg
 

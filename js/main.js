@@ -1,67 +1,17 @@
-var zebraButtonAvailable;
-
 $(function() {
-    var transform = createTransformStream(),
-        move = transform.filter(transformFunctionFilter("move")),
-        rotate = transform.filter(transformFunctionFilter("rotate")),
-        zebra_streams = createZebraStreams("#col_1"),
-        delete_command = createDeleteStream(),
-        currentObject = Bacon.latestValue(Obj.selectedObject);
+    var
+        zebra = new Zebra("col_1"),
+        transform = createTransformStream();
 
+    zebra.model(Obj);
     Obj.transformStream(transform);
     Obj.loadAll();
 
     $("#col_1_add_object").asEventStream("click").onValue(function(){
-        createObjects(1, "col_1");
-    });
-    zebra_streams.show.onValue(function(object){
-        centerObjectToObject($("#b_zebra"), object.parent());
-        $("#b_zebra").fadeIn(100);
-        Obj.selectedObject.push(Obj.objectByDomId[object.attr('id')]);
-        //console.log(selectedObject);
-    });
-    zebra_streams.hide.merge(delete_command).onValue(function(object){
-        Obj.selectedObject.push(null);
-        $("#b_zebra").fadeOut(100);
+        createObject("col_1");
     });
 
-    move.onValue(function(params){
-        centerObjectToObject($("#b_zebra"), currentObject().domObject().parent());
-    });
-    rotate.onValue(function(params){
-        var startCurPos = params[0][0],
-            object      = params[0][3],
-            curPos      = params[1],
-            radAngle, degreeAngle;
-        radAngle = Math.atan2((curPos.y - startCurPos.y), (curPos.x - startCurPos.x));
-        degreeAngle = radAngle * 180.0 / Math.PI;
-        selectedObject.rotation(degreeAngle);
-    });
-    delete_command.onValue(function(){
-        selectedObject.deleteStream.push().combineTemplate();
-    });
 });
-
-function createZebraStreams(zebraBlock){
-    var document_click = $(zebraBlock).asEventStream("click").map(function(event){return $(event.target).closest('div');}),
-        object_click = document_click.filter(function(object){return object.hasClass("transformable")}),
-        outside_click = document_click.filter(function(object){return !object.hasClass("transformable") && !object.hasClass("z");}),
-        zebra_visible = function(){return $("#b_zebra").is(':visible');},
-        show_zebra = object_click.filter(function(obj){return !zebra_visible() || (obj[0]!=currentObject().domObject()[0]);}),
-        remove_zebra = outside_click.filter(function(){return zebra_visible();}),
-        currentObject = Bacon.latestValue(Obj.selectedObject);
-    zebraButtonAvailable = (
-        show_zebra
-            .delay(300)
-            .map(true)
-            .merge(remove_zebra.map(false))
-            .toProperty(false)
-        );
-    return {
-        show: show_zebra,
-        hide: remove_zebra
-    };
-}
 
 function createTransformStream(){
     var transforming = (new Bacon.Bus()),
@@ -108,56 +58,17 @@ function createTransformStream(){
     );
 }
 
-function createDeleteStream(){
-    return (
-        $(".delete_button")
-            .asEventStream("click")
-            .filter(zebraButtonAvailable)
-    );
-}
-
-function transformFunctionFilter(func){
-    return (function(params){
-        return params.type === func;
-    })
-}
-
-function centerObjectToObject(objectToCenter, objectBase){
-    var center = {
-        x: objectBase.offset().left + (objectBase.width()  / 2),
-        y: objectBase.offset().top  + (objectBase.height() / 2)
-    };
-    moveObject(objectToCenter, center.x - objectToCenter.width() / 2, center.y - objectToCenter.height() / 2);
-}
-
-function moveObject(object, x, y){
-    object.css('left', x);
-    object.css('top', y);
-}
-
-function resizeObject(object, w, h){
-    var origLeft   = object.offset().left,
-        origTop    = object.offset().top,
-        origWidth  = object.width(),
-        origHeight = object.height();
-    moveObject(object, origLeft-((w-origWidth)/2), origTop-((h-origHeight)/2));
-    object.css('width', Math.round(w));
-    object.css('height', Math.round(h));
-    object.css('line-height', Math.round(h) + "px");
-}
-
-function createObjects(n, block){
-    var i, color, obj,
+function createObject(block){
+    var color, obj,
         top, left, width, height, size;
-    for(i=0;i<n;i++){
-        color = get_random_color();
-        top = Math.round(Math.random()*(window.innerHeight-100));
-        left = Math.round(Math.random()*($("#" + block).width()-200));
-        height = Math.round(Math.random()*(window.innerHeight-top)/2)+30;
-        width = Math.round(Math.random()*($("#" + block).width()-left)/3)+60;
 
-        obj = new Obj(block, i, left, top, width, height, color);
-    }
+    color = get_random_color();
+    top = Math.round(Math.random()*(window.innerHeight-100));
+    left = Math.round(Math.random()*($("#" + block).width()-200));
+    height = Math.round(Math.random()*(window.innerHeight-top)/2)+30;
+    width = Math.round(Math.random()*($("#" + block).width()-left)/3)+60;
+
+    obj = new Obj(block, null, left, top, width, height, color);
 }
 
 function get_random_color() {
