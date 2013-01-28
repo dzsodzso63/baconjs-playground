@@ -14,4 +14,6 @@ Compile CoffeeScript
 
 Watch and compile CoffeeScript files with this command:
 
+```bash
 coffee -wc -o js/ js/coffee/*.coffee
+```
