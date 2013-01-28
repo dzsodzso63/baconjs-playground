@@ -2,6 +2,7 @@ $ =>
 
   FlashMessage.target($("#flash"))
   zebra = new Zebra("col_1", Obj);
+  meeting = new Meeting(Obj, "col_1", "col_2")
 
   Obj.loadAll()
 

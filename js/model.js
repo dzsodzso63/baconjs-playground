@@ -34,12 +34,17 @@
       return "object_" + id;
     };
 
+    Obj.domId = function(id, canvas) {
+      return 'b_' + canvas + '_' + Obj.prefix + id;
+    };
+
     Obj.loadObject = function(id) {
       var jsonData, o, obj;
       jsonData = localStorage.getItem(Obj.storeKey(id));
       if (jsonData) {
         o = JSON.parse(jsonData);
-        return obj = new Obj(o.canvas, id, o.left, o.top, o.width, o.height, o.colorCode, o.deg);
+        obj = new Obj(o.canvas, id, o.left, o.top, o.width, o.height, o.colorCode, o.deg);
+        return obj.notifyChange();
       }
     };
 
@@ -51,6 +56,8 @@
     };
 
     Obj.selectedObject = new Bacon.Bus();
+
+    Obj.notifyChangeStream = new Bacon.Bus();
 
     function Obj(canvas, id, left, top, width, height, colorCode, deg) {
       var isNew;
@@ -65,6 +72,8 @@
       this.deleteThis = __bind(this.deleteThis, this);
 
       this.persist = __bind(this.persist, this);
+
+      this.notifyChange = __bind(this.notifyChange, this);
 
       this.transformDone = __bind(this.transformDone, this);
 
@@ -85,7 +94,7 @@
         this.id = parseInt(Obj.objectCount(), 10) + 1;
         isNew = true;
       }
-      this.domId = 'b_' + this.canvas + '_' + Obj.prefix + this.id;
+      this.domId = Obj.domId(this.id, this.canvas);
       this.createObject();
       this.size({
         width: this.width,
@@ -113,7 +122,7 @@
       this.persistStream.onValue(this.persist);
       this.transformDoneStream.onValue(this.transformDone);
       this.selectionFilter = Obj.selectedObject.map(function(obj) {
-        return (obj != null ? obj.id : void 0) === _this.id;
+        return ((obj != null ? obj.id : void 0) === _this.id) && ((obj != null ? obj.canvas : void 0) === _this.canvas);
       }).toProperty();
       this.transformStream(Obj.globalTransformStream.filter(this.selectionFilter));
       this.deleteStream = new Bacon.Bus();
@@ -245,7 +254,15 @@
     };
 
     Obj.prototype.transformDone = function() {
-      return this.persistStream.push();
+      this.persistStream.push();
+      return this.notifyChange();
+    };
+
+    Obj.prototype.notifyChange = function() {
+      return Obj.notifyChangeStream.push({
+        canvas: this.canvas,
+        object: this
+      });
     };
 
     Obj.prototype.persist = function() {
@@ -263,7 +280,9 @@
         return $(this).remove();
       });
       localStorage.removeItem(this.storeKey());
-      return FlashMessage.message("Object deleted.");
+      FlashMessage.message("Object deleted.");
+      delete Obj.objectByDomId[this.domId];
+      return this.notifyChange();
     };
 
     return Obj;

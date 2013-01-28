@@ -11,23 +11,27 @@ class window.Obj extends DisplayObject
     localStorage.getItem("object_count") || 0
   @storeKey: (id) ->
     "object_" + id
+  @domId: (id, canvas) ->
+    'b_' + canvas + '_' + Obj.prefix + id
   @loadObject: (id) ->
     jsonData = localStorage.getItem(Obj.storeKey(id))
     if jsonData
       o = JSON.parse(jsonData)
       obj = new Obj(o.canvas, id, o.left, o.top, o.width, o.height, o.colorCode, o.deg)
+      obj.notifyChange()
   @transformStream: (trans) =>
     if trans?
       @globalTransformStream = trans
     @globalTransformStream
   @selectedObject: (new Bacon.Bus())
+  @notifyChangeStream: (new Bacon.Bus())
 
   constructor: (@canvas, @id, @left, @top, @width, @height, @colorCode, @deg) ->
     isNew = false
     if !@id
       @id = parseInt(Obj.objectCount(), 10) + 1
       isNew = true
-    @domId = 'b_' + @canvas + '_' + Obj.prefix + @id
+    @domId = Obj.domId(@id, @canvas)
     @createObject()
     @size({width: @width, height: @height})
     @position({left: @left, top: @top})
@@ -42,7 +46,7 @@ class window.Obj extends DisplayObject
     @transformDoneStream = (new Bacon.Bus())
     @persistStream.onValue(@persist)
     @transformDoneStream.onValue(@transformDone)
-    @selectionFilter = Obj.selectedObject.map((obj) => obj?.id == @id).toProperty()
+    @selectionFilter = Obj.selectedObject.map((obj) => (obj?.id == @id) and (obj?.canvas == @canvas)).toProperty()
     @transformStream(Obj.globalTransformStream.filter(@selectionFilter))
     @deleteStream = new Bacon.Bus()
     @deleteStream.onValue(@deleteThis)
@@ -146,6 +150,10 @@ class window.Obj extends DisplayObject
 
   transformDone: =>
     @persistStream.push()
+    @notifyChange()
+
+  notifyChange: =>
+    Obj.notifyChangeStream.push({canvas: @canvas, object: @})
 
   persist: =>
     jsonData = JSON.stringify(@)
@@ -160,3 +168,5 @@ class window.Obj extends DisplayObject
     )
     localStorage.removeItem(@storeKey())
     FlashMessage.message "Object deleted."
+    delete Obj.objectByDomId[@domId]
+    @notifyChange()
