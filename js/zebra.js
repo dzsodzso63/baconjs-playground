@@ -162,8 +162,9 @@
       startMousePos = mouse_position.sampledBy(mouse_down);
       currentObject = Bacon.latestValue(Obj.selectedObject);
       function_ended.onValue(function() {
+        var _ref;
         transforming.push(false);
-        return currentObject().persistStream.push();
+        return (_ref = currentObject().transformDoneStream) != null ? _ref.push() : void 0;
       });
       function_started.onValue(function(func) {
         return transforming.push(true);

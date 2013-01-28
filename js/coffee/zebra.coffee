@@ -96,7 +96,7 @@ class window.Zebra extends DisplayObject
 
     function_ended.onValue( =>
       transforming.push(false)
-      currentObject().persistStream.push()
+      currentObject().transformDoneStream?.push()
     )
 
     function_started.onValue((func) =>

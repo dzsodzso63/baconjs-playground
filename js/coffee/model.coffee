@@ -39,7 +39,9 @@ class window.Obj extends DisplayObject
 
   createStreams: =>
     @persistStream = (new Bacon.Bus())
+    @transformDoneStream = (new Bacon.Bus())
     @persistStream.onValue(@persist)
+    @transformDoneStream.onValue(@transformDone)
     @selectionFilter = Obj.selectedObject.map((obj) => obj?.id == @id).toProperty()
     @transformStream(Obj.globalTransformStream.filter(@selectionFilter))
     @deleteStream = new Bacon.Bus()
@@ -141,6 +143,9 @@ class window.Obj extends DisplayObject
 
   storeKey: ->
     Obj.storeKey(@id)
+
+  transformDone: =>
+    @persistStream.push()
 
   persist: =>
     jsonData = JSON.stringify(@)

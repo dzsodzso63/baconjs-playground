@@ -66,6 +66,8 @@
 
       this.persist = __bind(this.persist, this);
 
+      this.transformDone = __bind(this.transformDone, this);
+
       this.toJSON = __bind(this.toJSON, this);
 
       this.rotation = __bind(this.rotation, this);
@@ -107,7 +109,9 @@
     Obj.prototype.createStreams = function() {
       var _this = this;
       this.persistStream = new Bacon.Bus();
+      this.transformDoneStream = new Bacon.Bus();
       this.persistStream.onValue(this.persist);
+      this.transformDoneStream.onValue(this.transformDone);
       this.selectionFilter = Obj.selectedObject.map(function(obj) {
         return (obj != null ? obj.id : void 0) === _this.id;
       }).toProperty();
@@ -238,6 +242,10 @@
 
     Obj.prototype.storeKey = function() {
       return Obj.storeKey(this.id);
+    };
+
+    Obj.prototype.transformDone = function() {
+      return this.persistStream.push();
     };
 
     Obj.prototype.persist = function() {
