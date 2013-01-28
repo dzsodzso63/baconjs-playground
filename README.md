@@ -15,7 +15,7 @@ Trying out Bacon.js, an "FRP Zebra"
 
 #### Requirements
 
-* CoffeeScript installed
+* CoffeeScript installed (Install [Node](http://nodejs.org/), if you don't have it)
 
 
 #### Compile CoffeeScript
