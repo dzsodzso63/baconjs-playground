@@ -17,6 +17,12 @@ Trying out Bacon.js, an "FRP Zebra"
 
 * CoffeeScript installed (Install [Node](http://nodejs.org/), if you don't have it)
 
+With Node installed, install CoffeeScript node package:
+
+```bash
+npm install -g coffee-script
+```
+
 
 #### Compile CoffeeScript
 
